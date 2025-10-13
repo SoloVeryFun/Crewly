@@ -1,7 +1,7 @@
 📌 Client and Executor Registration in Telegram Bot
 📖 Description
 
-This module handles onboarding (first-time entry) and user registration.
+This module handles onboarding (first-time entry) and user registration in a Telegram bot.
 When a user starts the bot, they choose a role:
 
 👤 Client — searches for executors and posts job requests.
@@ -10,7 +10,9 @@ When a user starts the bot, they choose a role:
 
 After choosing a role, the user goes through a step-by-step registration process with required and optional fields.
 
-⚠️ Important: At this stage, the bot is not yet connected to the database. All collected data is stored in memory (temporary session storage) and can be extended to database integration later.
+⚠️ Important
+
+Users can edit their profiles after registration.
 
 🔑 Registration Flow
 1. General Onboarding
@@ -25,7 +27,7 @@ The following data is collected:
 
 📷 Avatar
 
-👤 Name/Nickname
+👤 Name / Nickname
 
 📝 About (up to 400–600 characters)
 
@@ -40,8 +42,6 @@ The following data is collected:
 ⏳ Availability (free / busy / partially available)
 
 Completion: confirmation of profile publication → profile goes to moderation.
-
-
 
 3. Client Registration
 
@@ -67,17 +67,12 @@ The following data is collected:
 
 Completion: job posting becomes available only after profile moderation.
 
-
 ⚙️ Technical Notes
 
-At this stage, no database integration is implemented.
+Implemented using NuGet package Telegram.Bot 22.x.
 
-User data is stored in session state during the registration flow.
+Uses Microsoft.EntityFrameworkCore for database operations with SQL Server.
 
-A UserState mechanism is used for step-by-step data collection.
+All collected data is stored in database tables (Clients, Executors, Orders)
 
-Future updates will include persistent storage in database tables (Clients, Executors, Orders).
-
-Users can edit their profile after registration.
-
-♾️ Implemented using NuGet package Telegram.Bot 22.x
+Future updates will include menu navigation for easier bot usage.

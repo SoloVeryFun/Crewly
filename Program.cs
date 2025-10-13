@@ -2,11 +2,15 @@
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Crewly.Data;
 
 using Crewly;
+using Microsoft.EntityFrameworkCore;
 
+new DataBaseHandler();
+    
 using var cts = new CancellationTokenSource();
-var bot = new TelegramBotClient("TELEGRAM_BOT_TOKEN", cancellationToken:cts.Token);
+var bot = new TelegramBotClient("YOUR_TELEGRAM_BOT_TOKEN", cancellationToken:cts.Token);
 var me = await bot.GetMe();
 
 var commandHandler = new CommandHandler(bot);

@@ -122,7 +122,27 @@ public class ResponsesForProcessing(TelegramBotClient bot)
             if (session.State == end)
             {
                 await bot.SendMessage(userId, "✅ Спасибо! Ваш профиль создан.");
+
+                await using var db = new BotDbContext();
+                
                 // Save
+                switch (end)
+                {
+                    case UserState.ExecutorRegistrationCompleted:
+                        if (session is ExecutorData executor)
+                        {
+                            db.Executors.Add(executor);
+                            db.SaveChanges();
+                        }
+                        break;
+                    case UserState.ClientRegistrationCompleted:
+                        if (session is ClientData client)
+                        {
+                            db.Clients.Add(client);
+                            db.SaveChanges();
+                        }
+                        break;
+                }
             }
             else
             {

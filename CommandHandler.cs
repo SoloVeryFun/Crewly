@@ -7,7 +7,6 @@ namespace Crewly;
 
 public class CommandHandler(TelegramBotClient bot)
 {
-    private readonly ResponsesForProcessing _responses =  new ResponsesForProcessing(bot);
     private readonly BotButtons _botButtons = new BotButtons();
     
     public async Task HandleMessage(Message message, TelegramBotClient bot)
@@ -28,7 +27,7 @@ public class CommandHandler(TelegramBotClient bot)
 
         if (UserStateGroup.IsRegistration(session.State))
         {
-            await _responses.ResponseRegistrationProcess(userId, message.Text!, session.Role);
+            await new ResponsesForProcessing(bot).ResponseRegistrationProcess(userId, message.Text!, session.Role);
         }
     }
 }
