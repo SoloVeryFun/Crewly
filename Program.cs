@@ -5,15 +5,16 @@ using Telegram.Bot.Types.Enums;
 using Crewly.Data;
 
 using Crewly;
-using Microsoft.EntityFrameworkCore;
+using Crewly.CleanUpRuntime;
 
-new DataBaseHandler();
-    
+DataBaseHandler.EnsureMigrated();
+CleanUpRuntime.StartCleanupTask(SessionManager.GetExpiredKeys, SessionManager.Remove);
+
 using var cts = new CancellationTokenSource();
-var bot = new TelegramBotClient("YOUR_TELEGRAM_BOT_TOKEN", cancellationToken:cts.Token);
+var bot = new TelegramBotClient("YOUR_TELEGRAM_BOT_API", cancellationToken:cts.Token);
 var me = await bot.GetMe();
 
-var commandHandler = new CommandHandler(bot);
+var commandHandler = new CommandHandler();
 
 bot.OnError += OnError;
 bot.OnMessage += OnMessage;

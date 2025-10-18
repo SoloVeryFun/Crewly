@@ -1,7 +1,7 @@
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Crewly.Data;
-using Crewly.RegistrationProcess;
+using Crewly.MessageHandlingProcesses;
 
 namespace Crewly;
 
@@ -9,18 +9,19 @@ public class CallbackQueryHandler
 {
     private readonly TelegramBotClient _bot;
     private readonly Dictionary<string, Func<long, Task>> _handlers;
-    private readonly ResponsesForProcessing _responsesForProcessing;
+    private readonly ResponseRegistrationProcessHandler _responsesForProcessing;
     
     public CallbackQueryHandler(TelegramBotClient bot)
     {
         _bot = bot;
+        
         _handlers = new Dictionary<string, Func<long, Task>>
         {
-            {"executor", userId => RegisterUser<ExecutorData>(userId, UserRole.Executor, UserState.ExecutorRegistrationStart)},
+            {"executor",  userId => RegisterUser<ExecutorData>(userId, UserRole.Executor, UserState.ExecutorRegistrationStart)},
             {"client", userId => RegisterUser<ClientData>(userId, UserRole.Client, UserState.ClientRegistrationStart)}
         }; 
 
-        _responsesForProcessing = new ResponsesForProcessing(_bot);
+        _responsesForProcessing = new ResponseRegistrationProcessHandler(_bot);
     }
 
     public async Task HandleCallbackQuery(CallbackQuery query)
@@ -40,18 +41,19 @@ public class CallbackQueryHandler
     private async Task RegisterUser<T>(long userId, UserRole role, UserState userState)
         where T : UserData, new()
     {
-        var user = SessionManager.GetSession<UserData>(userId);
+        var user = await SessionManager.GetSession(userId);
 
         if (user is not T)
         {
             user = new T
             {
+                UserId = userId,
                 Role = role,
                 State = userState
             };
-            SessionManager.SetSession(userId, user);
+            SessionManager.SetSession(user);
         }
         
-        await _responsesForProcessing.ResponseRegistrationProcess( userId, "Registration Start", user.Role);
+        await _responsesForProcessing.ResponseRegistrationProcess( userId, new Message(){Text = "Registration start"});
     }
 }

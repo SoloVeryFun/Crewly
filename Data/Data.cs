@@ -9,8 +9,21 @@ public enum UserRole
 
 public static class UserStateGroup
 {
+    public static bool IsStart(UserState state) => StartState.Contains(state);
     public static bool IsRegistration(UserState userState) => RegistrationState.Contains(userState);
+    public static bool IsWaitForVerification(UserState userState) => WaitForVerification.Contains(userState);
+    public static bool IsMenuAccess(UserState userState) => MenuAccess.Contains(userState);
+
+    private static readonly HashSet<UserState> MenuAccess = 
+    [
+        UserState.Main,
+    ];
     
+    private static readonly HashSet<UserState> WaitForVerification =
+    [
+        UserState.WaitForVerification,
+    ];
+        
     private static readonly  HashSet<UserState> RegistrationState =
     [
         UserState.ExecutorRegistrationStart,
@@ -33,6 +46,11 @@ public static class UserStateGroup
         UserState.ClientLanguage,
         UserState.ClientLocation,
         UserState.ClientAvatar
+    ];
+
+    private static readonly HashSet<UserState> StartState =
+    [
+        UserState.Start,
     ];
 }
 

@@ -1,78 +1,44 @@
-📌 Client and Executor Registration in Telegram Bot
-📖 Description
+🤖 Client and Executor Registration — Telegram Bot Module
+📖 Overview
 
-This module handles onboarding (first-time entry) and user registration in a Telegram bot.
-When a user starts the bot, they choose a role:
+This module manages user onboarding, state-based message handling, and database operations in a Telegram bot.
+It allows users to register as either Client or Executor and manage their profiles through an intuitive menu system.
 
-👤 Client — searches for executors and posts job requests.
+📌 Key Features
+🔹 State-Based Message Handling
 
-🎨 Executor — creates a freelancer profile and receives job requests.
+Every incoming message is processed according to the user’s current state.
+This enables:
 
-After choosing a role, the user goes through a step-by-step registration process with required and optional fields.
+Smooth, step-by-step interaction flow;
 
-⚠️ Important
+Proper data persistence in the database;
 
-Users can edit their profiles after registration.
+Stable and predictable registration logic.
 
-🔑 Registration Flow
-1. General Onboarding
+🔹 Optimized Database Integration
 
-/start → welcome message.
+Built on Entity Framework Core (SQL Server);
 
-Role selection: [I’m a Client] / [I’m an Executor].
+Fully optimized CRUD operations (create, update, delete);
 
-2. Executor Registration
+Includes session caching and automatic cleanup of inactive sessions.
 
-The following data is collected:
+🔹 Navigation Menu
 
-📷 Avatar
+📄 View your profile;
 
-👤 Name / Nickname
+A new ⚙ Settings menu has been added, featuring:
+🗑 Delete account;
 
-📝 About (up to 400–600 characters)
+⚙️  Technical Details
 
-🏷 Specializations/Tags (up to 5)
+Telegram.Bot 22.x — for Telegram API integration;
 
-💲 Rate (hourly or fixed)
+Entity Framework Core — for SQL Server data handling;
 
-🧑‍💻 Experience (years/level)
+🚀 Future Improvements
 
-🔗 Portfolio links (Behance, Dribbble, Google Drive, etc.)
+Extended profile editing;
 
-⏳ Availability (free / busy / partially available)
-
-Completion: confirmation of profile publication → profile goes to moderation.
-
-3. Client Registration
-
-The following data is collected:
-
-📷 Avatar or Logo
-
-👤 Name / Company name
-
-📝 Description (up to 400–600 characters)
-
-🏢 Type (individual / studio / company)
-
-💲 Budget range
-
-🔗 Links / Brand guide (optional)
-
-🌍 Location
-
-🌐 Language(s)
-
-✅ Verification request
-
-Completion: job posting becomes available only after profile moderation.
-
-⚙️ Technical Notes
-
-Implemented using NuGet package Telegram.Bot 22.x.
-
-Uses Microsoft.EntityFrameworkCore for database operations with SQL Server.
-
-All collected data is stored in database tables (Clients, Executors, Orders)
-
-Future updates will include menu navigation for easier bot usage.
+Job posting and response management between Clients and Executors.

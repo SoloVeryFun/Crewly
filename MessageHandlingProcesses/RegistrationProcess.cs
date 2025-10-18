@@ -1,7 +1,8 @@
 using Crewly.Data;
 using Telegram.Bot;
+using Telegram.Bot.Types;
 
-namespace Crewly.RegistrationProcess;
+namespace Crewly.MessageHandlingProcesses;
 
 public static class RegQuestions
 {
@@ -80,19 +81,22 @@ public static class RegQuestions
     }
 }
 
-public class ResponsesForProcessing(TelegramBotClient bot)
+public class ResponseRegistrationProcessHandler(TelegramBotClient bot)
 {
-    public async Task ResponseRegistrationProcess(long userId, string input, UserRole role)
+    public async Task ResponseRegistrationProcess(long userId, Message message)
     {
+        var session = await SessionManager.GetSession(userId);
+        UserRole role = session.Role;
+        
         switch (role)
         {
             case UserRole.Executor:
-                await RegistrationProcess<ExecutorData>(userId, input,
+                await RegistrationProcess(userId, message,
                     UserState.ExecutorRegistrationStart, UserState.ExecutorRegistrationCompleted);
                 break;
 
             case UserRole.Client:
-                await RegistrationProcess<ClientData>(userId, input,
+                await RegistrationProcess(userId, message,
                     UserState.ClientRegistrationStart, UserState.ClientRegistrationCompleted);
                 break;
 
@@ -102,12 +106,11 @@ public class ResponsesForProcessing(TelegramBotClient bot)
         }
     }
 
-    private async Task RegistrationProcess<T>(long userId, string input, UserState start,
-        UserState end) where T : UserData, new()
-    {
+    private async Task RegistrationProcess(long userId, Message message, UserState start,
+        UserState end) 
         {
-            var session = SessionManager.GetSession<T>(userId);
-
+            var session = await SessionManager.GetSession(userId);
+            
             if (session.State == start)
             {
                 session.State = RegQuestions.GetNext(session.State);
@@ -115,31 +118,61 @@ public class ResponsesForProcessing(TelegramBotClient bot)
                 return;
             }
             
-            RegQuestions.SetValue(session, input);
+            if (session.State == UserState.ExecutorAvatar ||
+                session.State == UserState.ClientAvatar)
+            {
+                if(message.Photo == null)
+                {
+                    await bot.SendMessage(userId, "❗ Пожалуйста, отправьте текст или фото в зависимости от шага.");
+                    return;
+                }
+                
+                var photo = message.Photo!.Last();
+                var file = await bot.GetFile(photo.FileId);
 
-            session.State = RegQuestions.GetNext(session.State);
+                Directory.CreateDirectory("Images");
+
+                var fileName = $"{session.Role}_{session.UserId}_{Guid.NewGuid()}.jpg";
+                var filePath = Path.Combine("Images", fileName);
+
+                await using var fs = new FileStream(filePath, FileMode.Create);
+                await bot.DownloadFile(file.FilePath!, fs);
+                
+                if (session is ExecutorData executor)
+                    executor.Avatar = filePath;
+                else if (session is ClientData client)
+                    client.Avatar = filePath;
+                
+                session.State = RegQuestions.GetNext(session.State);
+            }   
+            
+            else if(message.Text != null)
+            {
+                RegQuestions.SetValue(session, message.Text!);
+                session.State = RegQuestions.GetNext(session.State);
+            }
 
             if (session.State == end)
             {
-                await bot.SendMessage(userId, "✅ Спасибо! Ваш профиль создан.");
-
                 await using var db = new BotDbContext();
                 
                 // Save
                 switch (end)
                 {
                     case UserState.ExecutorRegistrationCompleted:
+                        session.State = UserState.Main;
                         if (session is ExecutorData executor)
                         {
-                            db.Executors.Add(executor);
-                            db.SaveChanges();
+                            await bot.SendMessage(userId, "✅ Спасибо! Ваш профиль создан.", replyMarkup: BotButtons.ExecutorClientUsageMenu());
+                            await SqlDataBaseSave.SaveAsync(executor);
                         }
                         break;
                     case UserState.ClientRegistrationCompleted:
+                        session.State = UserState.Main;
                         if (session is ClientData client)
                         {
-                            db.Clients.Add(client);
-                            db.SaveChanges();
+                            await bot.SendMessage(userId, "✅ Спасибо! Ваш профиль создан.", replyMarkup: BotButtons.CreateClientUsageMenu());
+                            await SqlDataBaseSave.SaveAsync(client);
                         }
                         break;
                 }
@@ -149,5 +182,5 @@ public class ResponsesForProcessing(TelegramBotClient bot)
                 await bot.SendMessage(userId, RegQuestions.Questions[session.State]);
             }
         }
-    }
+    
 }

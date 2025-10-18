@@ -2,9 +2,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Crewly.Data;
 
-public class DataBaseHandler
+public static class DataBaseHandler
 {
-    public DataBaseHandler()
+    public static void EnsureMigrated()
     {
         using var dbContext = new BotDbContext();
         dbContext.Database.Migrate();

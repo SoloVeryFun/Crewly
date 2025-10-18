@@ -1,33 +1,26 @@
-using Crewly.Data;
+using Crewly.CommandsHandler;
+
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Crewly.RegistrationProcess;
 
 namespace Crewly;
 
-public class CommandHandler(TelegramBotClient bot)
+public class CommandHandler
 {
-    private readonly BotButtons _botButtons = new BotButtons();
+    private readonly IEnumerable<ICommandHandler> _handlers =  new List<ICommandHandler>()
+    {
+        new RegisterMessages(),
+        new WaitForVerificationMessages(),
+        new OwnSurveyMessage(),
+        new StartMessages()
+    };
     
     public async Task HandleMessage(Message message, TelegramBotClient bot)
     {
         var userId = message.Chat.Id;
-        var session = SessionManager.GetDefault(userId);
+        var session = await SessionManager.GetSession(userId);
 
-        if (message.Text == "/start")
-        {
-            if(session.State == UserState.Start)
-            {
-                await bot.SendMessage(message.Chat.Id,
-                    "Привет! Это Crawly — бот для быстрого поиска проверенных, креативных специалистов.",
-                    replyMarkup: _botButtons.CreateRoleSelectionKeyboard());
-                return;
-            }
-        }
-
-        if (UserStateGroup.IsRegistration(session.State))
-        {
-            await new ResponsesForProcessing(bot).ResponseRegistrationProcess(userId, message.Text!, session.Role);
-        }
+        await _handlers.FirstOrDefault(h => h.CanExecuteCommand(session.State))
+            ?.HandleAsync(userId, message, bot)!;
     }
 }
