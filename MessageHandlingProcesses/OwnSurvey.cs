@@ -38,7 +38,7 @@ public class SendUserProfileProcessHandler
     
     private string BuildClientCaption(ClientData client)
     {
-        return $"👤 Роль: Исполнитель\n" +
+        return $"👤 Роль: Клиент\n" +
                $"Имя: {client.Name}\n" +
                $"Био: {client.Bio}\n" +
                $"Специализации: {client.Location}\n" +

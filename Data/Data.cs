@@ -16,7 +16,7 @@ public static class UserStateGroup
 
     private static readonly HashSet<UserState> MenuAccess = 
     [
-        UserState.Main,
+        UserState.Menu,
     ];
     
     private static readonly HashSet<UserState> WaitForVerification =
@@ -54,6 +54,8 @@ public static class UserStateGroup
     ];
 }
 
+
+//DATA
 public class UserData
 {
     public long UserId { get; set; }

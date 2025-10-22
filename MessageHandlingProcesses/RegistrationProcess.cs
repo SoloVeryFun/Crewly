@@ -2,31 +2,197 @@ using Crewly.Data;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
+using Crewly.Buttons;
+using Crewly.Session;
+
 namespace Crewly.MessageHandlingProcesses;
+
+public enum InputType
+{
+    Text,
+    Photo,
+    Links,
+    MultiText
+}
+
+public class RegistrationStep
+{
+    public string Question { get; init; } = "";
+    public InputType InputType { get; init; }
+    public int? MaxLength { get; init; } = 100;
+    public int? MaxItems { get; init; } = 5;
+}
 
 public static class RegQuestions
 {
-    public static readonly Dictionary<UserState, string> Questions = new()
+    
+    public static readonly Dictionary<UserState, RegistrationStep> Questions = new()
     {
-        { UserState.ExecutorName, "Как вас зовут?" },
-        { UserState.ExecutorBio, "Коротко расскажите о себе (до 400 символов)." },
-        { UserState.ExecutorSpecializations, "Укажите ваши специализации (до 5)." },
-        { UserState.ExecutorBid, "Какая у вас ставка (почасовая/фикс)?" },
-        { UserState.ExecutorExperience, "Сколько у вас опыта (лет/уровень)?" },
-        { UserState.ExecutorPortfolio, "Пришлите ссылки на портфолио (Behance, Dribbble, Drive)." },
-        { UserState.ExecutorAvailability, "Ваша занятость: свободен, частично занят, не берете заказы?" },
-        { UserState.ExecutorAvatar, "Загрузите ваше фото/аватар." },
-        { UserState.ExecutorContacts, "Оставьте контакты (телеграм, почта, телефон) — по желанию." },
+        //Executor Steps
+        [UserState.ExecutorName] = new() 
+        { 
+            Question = "Как вас зовут?", 
+            InputType = InputType.Text, 
+            MaxLength = 100     
+        },
         
-        { UserState.ClientName, "Как вас зовут или как называется ваша компания/студия?" },
-        { UserState.ClientBio, "Расскажите о себе или о вашем проекте (до 600 символов)." },
-        { UserState.ClientType, "Вы частное лицо, студия или компания?" },
-        { UserState.ClientBudgetary, "Какой у вас бюджет?" },
-        { UserState.ClientBrandGuide, "Есть ли у вас ссылки или бренд‑гайд (опционально)?" },
-        { UserState.ClientLanguage, "На каком языке(ах) будет проект?" },
-        { UserState.ClientAvatar, "Прикрепите ваш аватар или логотип."},
-        { UserState.ClientLocation, "Где вы или ваша компания находитесь?" },
+        [UserState.ExecutorBio] = new() 
+        { 
+            Question = "Коротко расскажите о себе (до 400 символов).", 
+            InputType = InputType.Text, 
+            MaxLength = 400     
+        },
+        
+        [UserState.ExecutorSpecializations] = new() 
+        { 
+            Question = "Укажите ваши специализации (до 5).(Пишите разделно ',' )", 
+            InputType = InputType.MultiText, 
+            MaxItems = 5
+        },
+        
+        [UserState.ExecutorBid] = new() 
+        {        
+            Question = "Какая у вас ставка (почасовая/фикс)?", 
+            InputType = InputType.Text, 
+            MaxLength = 100     
+        },
+        
+        [UserState.ExecutorExperience] = new() 
+        { 
+            Question = "Сколько у вас опыта (лет/уровень)?", 
+            InputType = InputType.Text, 
+            MaxLength = 100     
+        },
+        
+        [UserState.ExecutorPortfolio] = new() 
+        { 
+            Question = "Пришлите ссылки на портфолио (Behance, Dribbble, Drive).", 
+            InputType = InputType.Links,   
+        },
+        
+        [UserState.ExecutorAvailability] = new() 
+        { 
+            Question = "Ваша занятость: свободен, частично занят, не берете заказы?", 
+            InputType = InputType.Text, 
+            MaxLength = 100     
+        },
+        
+        [UserState.ExecutorAvatar] = new() 
+        { 
+            Question = "Загрузите ваше фото/аватар.", 
+            InputType = InputType.Photo, 
+        },
+        
+        [UserState.ExecutorContacts] = new() 
+        { 
+            Question = "Оставьте контакты (телеграм, почта, телефон) — по желанию.", 
+            InputType = InputType.Text, 
+            MaxLength = 100     
+        },
+        
+        //Clients Steps
+        [UserState.ClientName] = new() 
+        { 
+            Question = "Как вас зовут или как называется ваша компания/студия?", 
+            InputType = InputType.Text, 
+            MaxLength = 100     
+        },
+        
+        [UserState.ClientBio] = new() 
+        { 
+            Question = "Расскажите о себе или о вашем проекте (до 600 символов).", 
+            InputType = InputType.Text, 
+            MaxLength = 600     
+        },
+        [UserState.ClientType] = new() 
+        { 
+            Question = "Вы частное лицо, студия или компания?", 
+            InputType = InputType.Text, 
+            MaxLength = 100     
+        },
+        [UserState.ClientBudgetary] = new() 
+        { 
+            Question = "Какой у вас бюджет?", 
+            InputType = InputType.Text, 
+            MaxLength = 100     
+        },
+        [UserState.ClientBrandGuide] = new() 
+        { 
+            Question = "Есть ли у вас ссылки или бренд‑гайд?", 
+            InputType = InputType.Links, 
+            MaxLength = 100     
+        },
+        [UserState.ClientLanguage] = new() 
+        { 
+            Question = "На каком языке(ах) ваш проект?", 
+            InputType = InputType.Text, 
+            MaxLength = 100     
+        },
+        [UserState.ClientAvatar] = new() 
+        { 
+            Question = "Прикрепите ваш аватар или логотип.", 
+            InputType = InputType.Photo, 
+            MaxLength = 100     
+        },
+        [UserState.ClientLocation] = new() 
+        { 
+            Question = "Где вы или ваша компания находитесь?", 
+            InputType = InputType.Text, 
+            MaxLength = 100     
+        },
     };
+
+    public static bool ValidateInput(UserState userState, Message message, out string? error)
+    {
+        error = null;
+
+        if (!Questions.TryGetValue(userState, out var step))
+        {
+            return true;
+        }
+
+        switch (step.InputType)
+        {
+            case InputType.Photo:
+                if (message.Photo == null)
+                {
+                    error = "❗ Пожалуйста, отправьте фото.";
+                    return false;
+                }
+                break;
+            
+            case InputType.Text:
+                if (string.IsNullOrWhiteSpace(message.Text))
+                {
+                    error = "❗ Пожалуйста, введите текст.";
+                    return false;
+                }
+
+                if (step.MaxLength.HasValue && message.Text.Length > step.MaxLength.Value)
+                {
+                    error = $"❗ Текст слишком длинный. Максимум {step.MaxLength} символов.";
+                    return false;
+                }
+                break;
+            
+            case InputType.MultiText:
+                var items = message.Text?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                if (items == null || items.Length == 0)
+                {
+                    error = "❗ Укажите хотя бы одну специализацию.";
+                    return false;
+                }
+
+                if (step.MaxItems.HasValue && items.Length > step.MaxItems.Value)
+                {
+                    error = $"❗ Можно указать максимум {step.MaxItems} специализаций.";
+                    return false;
+                }
+                break;
+        }
+
+        return true;
+    }
 
     public static UserState GetNext(UserState current)
     {
@@ -37,20 +203,20 @@ public static class RegQuestions
             UserState.ExecutorBio => UserState.ExecutorSpecializations,
             UserState.ExecutorSpecializations => UserState.ExecutorBid,
             UserState.ExecutorBid => UserState.ExecutorExperience,
-            UserState.ExecutorExperience => UserState.ExecutorPortfolio,
-            UserState.ExecutorPortfolio => UserState.ExecutorAvailability,
+            UserState.ExecutorExperience => UserState.ExecutorAvailability,
             UserState.ExecutorAvailability => UserState.ExecutorAvatar,
-            UserState.ExecutorAvatar => UserState.ExecutorContacts,
+            UserState.ExecutorAvatar => UserState.ExecutorPortfolio,
+            UserState.ExecutorPortfolio => UserState.ExecutorContacts,
             UserState.ExecutorContacts => UserState.ExecutorRegistrationCompleted,
             
             UserState.ClientRegistrationStart => UserState.ClientName,
             UserState.ClientName => UserState.ClientBio,
             UserState.ClientBio => UserState.ClientType,
             UserState.ClientType => UserState.ClientBudgetary,
-            UserState.ClientBudgetary => UserState.ClientBrandGuide,
-            UserState.ClientBrandGuide => UserState.ClientLanguage,
-            UserState.ClientLanguage => UserState.ClientLocation,
-            UserState.ClientLocation => UserState.ClientAvatar,
+            UserState.ClientBudgetary => UserState.ClientLanguage,
+            UserState.ClientLanguage => UserState.ClientAvatar,
+            UserState.ClientAvatar => UserState.ClientBrandGuide,
+            UserState.ClientBrandGuide => UserState.ClientLocation,
             _ => UserState.ClientRegistrationCompleted,
         };
     }
@@ -91,13 +257,11 @@ public class ResponseRegistrationProcessHandler(TelegramBotClient bot)
         switch (role)
         {
             case UserRole.Executor:
-                await RegistrationProcess(userId, message,
-                    UserState.ExecutorRegistrationStart, UserState.ExecutorRegistrationCompleted);
+                await RegistrationProcess(userId, message, UserState.ExecutorRegistrationCompleted);
                 break;
 
             case UserRole.Client:
-                await RegistrationProcess(userId, message,
-                    UserState.ClientRegistrationStart, UserState.ClientRegistrationCompleted);
+                await RegistrationProcess(userId, message, UserState.ClientRegistrationCompleted);
                 break;
 
             default:
@@ -106,27 +270,18 @@ public class ResponseRegistrationProcessHandler(TelegramBotClient bot)
         }
     }
 
-    private async Task RegistrationProcess(long userId, Message message, UserState start,
-        UserState end) 
+    private async Task RegistrationProcess(long userId, Message message, UserState end) 
         {
             var session = await SessionManager.GetSession(userId);
-            
-            if (session.State == start)
+
+            if (!RegQuestions.ValidateInput(session.State, message, out var error))
             {
-                session.State = RegQuestions.GetNext(session.State);
-                await bot.SendMessage(userId, RegQuestions.Questions[session.State]);
+                await bot.SendMessage(userId, error!);
                 return;
             }
-            
-            if (session.State == UserState.ExecutorAvatar ||
-                session.State == UserState.ClientAvatar)
+
+            if (message.Photo != null)
             {
-                if(message.Photo == null)
-                {
-                    await bot.SendMessage(userId, "❗ Пожалуйста, отправьте текст или фото в зависимости от шага.");
-                    return;
-                }
-                
                 var photo = message.Photo!.Last();
                 var file = await bot.GetFile(photo.FileId);
 
@@ -138,19 +293,14 @@ public class ResponseRegistrationProcessHandler(TelegramBotClient bot)
                 await using var fs = new FileStream(filePath, FileMode.Create);
                 await bot.DownloadFile(file.FilePath!, fs);
                 
-                if (session is ExecutorData executor)
-                    executor.Avatar = filePath;
-                else if (session is ClientData client)
-                    client.Avatar = filePath;
-                
-                session.State = RegQuestions.GetNext(session.State);
-            }   
-            
-            else if(message.Text != null)
-            {
-                RegQuestions.SetValue(session, message.Text!);
-                session.State = RegQuestions.GetNext(session.State);
+                RegQuestions.SetValue(session, filePath);
             }
+            else if (message.Text != null)
+            {
+                RegQuestions.SetValue(session, message.Text);
+            }
+            
+            session.State = RegQuestions.GetNext(session.State);
 
             if (session.State == end)
             {
@@ -160,7 +310,7 @@ public class ResponseRegistrationProcessHandler(TelegramBotClient bot)
                 switch (end)
                 {
                     case UserState.ExecutorRegistrationCompleted:
-                        session.State = UserState.Main;
+                        session.State = UserState.Menu;
                         if (session is ExecutorData executor)
                         {
                             await bot.SendMessage(userId, "✅ Спасибо! Ваш профиль создан.", replyMarkup: BotButtons.ExecutorClientUsageMenu());
@@ -168,7 +318,7 @@ public class ResponseRegistrationProcessHandler(TelegramBotClient bot)
                         }
                         break;
                     case UserState.ClientRegistrationCompleted:
-                        session.State = UserState.Main;
+                        session.State = UserState.Menu;
                         if (session is ClientData client)
                         {
                             await bot.SendMessage(userId, "✅ Спасибо! Ваш профиль создан.", replyMarkup: BotButtons.CreateClientUsageMenu());
@@ -179,8 +329,7 @@ public class ResponseRegistrationProcessHandler(TelegramBotClient bot)
             }
             else
             {
-                await bot.SendMessage(userId, RegQuestions.Questions[session.State]);
+                await bot.SendMessage(userId, RegQuestions.Questions[session.State].Question);
             }
         }
-    
 }

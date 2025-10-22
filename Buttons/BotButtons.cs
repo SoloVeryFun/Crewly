@@ -1,6 +1,6 @@
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace Crewly;
+namespace Crewly.Buttons;
 
 
 public static class BotButtons
@@ -39,7 +39,8 @@ public static class KeyboardAndButtons
     {
         var replyKeyboard = new ReplyKeyboardMarkup(
         [
-            [ new KeyboardButton("Моя анкета"), new KeyboardButton("📄 Мои заявки") ],
+            [ new KeyboardButton("Моя анкета"), new KeyboardButton("Искать фрилансеров") ],
+            [ new KeyboardButton("Создание заказа")],
             [ new KeyboardButton("Настройки") ]
         ])
         {
@@ -54,7 +55,7 @@ public static class KeyboardAndButtons
     {
         var replyKeyboard = new ReplyKeyboardMarkup(
         [
-            [ new KeyboardButton("Моя анкета"), new KeyboardButton("📄 Мои заявки") ],
+            [ new KeyboardButton("Моя анкета"), new KeyboardButton("Искать заказов") ],
             [ new KeyboardButton("Настройки") ]
         ])
         {
@@ -78,6 +79,4 @@ public static class KeyboardAndButtons
         
         return replyKeyboard; 
     }
-    
-    
 }

@@ -1,9 +1,11 @@
 using Telegram.Bot.Types;
 using Telegram.Bot;
+using Telegram.Bot.Types.ReplyMarkups;
 
 using Crewly.Data;
 using Crewly.MessageHandlingProcesses;
-using Telegram.Bot.Types.ReplyMarkups;
+using Crewly.Buttons;
+using Crewly.Session;
 
 namespace Crewly.CommandsHandler;
 
@@ -20,10 +22,20 @@ public class OwnSurveyMessage : ICommandHandler
 
     public async Task HandleAsync(long userId, Message message, TelegramBotClient bot)
     {
+        UserData session;
+        
         switch (message.Text)
         {
             case "Моя анкета":
                 await new SendUserProfileProcessHandler().SendUserProfileProcess(userId, bot);
+                break;
+            
+            case "Создание заказа":
+                session = await SessionManager.GetSession(userId);
+                if (session.Role == UserRole.Client)
+                {
+                    //CREAT
+                }
                 break;
             
             case "Настройки":
@@ -34,7 +46,7 @@ public class OwnSurveyMessage : ICommandHandler
                 await DeleteProcess.Delete(userId);
                 await bot.SendMessage(chatId: userId, text: "Ваш аккаунт удален😔",replyMarkup: new ReplyKeyboardRemove());
                 
-                var session = await SessionManager.GetSession(userId);
+                session = await SessionManager.GetSession(userId);
                 Console.WriteLine(session.Role);
                 Console.WriteLine(session.State);
                 Console.WriteLine(session.UserId);

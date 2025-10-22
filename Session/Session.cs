@@ -2,12 +2,12 @@ using System.Collections.Concurrent;
 using Crewly.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace Crewly;
+namespace Crewly.Session;
 
 public static class SessionManager
 {
     private static readonly ConcurrentDictionary<long, (UserData Session, DateTime Expire)> Sessions = new();
-    private static readonly TimeSpan Ttl = TimeSpan.FromMinutes(30);
+    private static readonly TimeSpan Ttl = TimeSpan.FromMinutes(1);
     
     public static async Task<UserData> GetSession(long userId)
     {
@@ -20,6 +20,7 @@ public static class SessionManager
             
             Console.WriteLine("--------------------");
             Console.WriteLine(entry.Expire);
+            Console.WriteLine(DateTime.UtcNow);
             Console.WriteLine(entry.Session.State);
             Console.WriteLine("--------------------");
 
@@ -56,8 +57,8 @@ public static class SessionManager
     
     public static async Task<IEnumerable<long>> GetExpiredKeys()
     {
-        var now = DateTime.UtcNow;
-        return Sessions.Where(kvp => kvp.Value.Expire <= now).Select(kvp => kvp.Key);
+        var utcNow = DateTime.UtcNow;
+        return Sessions.Where(kvp => kvp.Value.Expire <= utcNow).Select(kvp => kvp.Key);
     }
 
     public static async Task Remove(long userId)

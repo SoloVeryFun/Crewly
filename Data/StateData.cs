@@ -11,9 +11,9 @@ public enum UserState
     ExecutorSpecializations,
     ExecutorBid,
     ExecutorExperience,
-    ExecutorPortfolio,
     ExecutorAvailability,
     ExecutorAvatar,
+    ExecutorPortfolio,
     ExecutorContacts,
     ExecutorRegistrationCompleted,
     
@@ -23,14 +23,15 @@ public enum UserState
     ClientBio,
     ClientType,
     ClientBudgetary,
-    ClientBrandGuide,
     ClientLanguage,
-    ClientLocation,
     ClientAvatar,
+    ClientBrandGuide,
+    ClientLocation,
     ClientRegistrationCompleted,    
     
     //Wait for verification
     WaitForVerification,
     
-    Main,
+    //
+    Menu,
 }
