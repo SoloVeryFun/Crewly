@@ -2,7 +2,7 @@ using Telegram.Bot;
 
 using Crewly.Data;
 using Crewly.Buttons;
-using Crewly.Session;
+using Crewly.Manager;
 
 namespace Crewly.MessageHandlingProcesses;
 
@@ -25,12 +25,12 @@ public class WaitForVerificationProcessHandler(TelegramBotClient bot, long userI
         {
             case UserRole.Client:
             await bot.SendMessage(userId, _text,
-                replyMarkup: BotButtons.CreateClientUsageMenu());
+                replyMarkup: BotButtons.ClientUsageMenu());
             break;
             
             case UserRole.Executor:
             await bot.SendMessage(userId, _text,
-                replyMarkup: BotButtons.ExecutorClientUsageMenu());
+                replyMarkup: BotButtons.ExecutorUsageMenu());
             break;
         }
     }

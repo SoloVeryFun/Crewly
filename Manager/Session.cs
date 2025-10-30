@@ -2,12 +2,12 @@ using System.Collections.Concurrent;
 using Crewly.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace Crewly.Session;
+namespace Crewly.Manager;
 
 public static class SessionManager
 {
     private static readonly ConcurrentDictionary<long, (UserData Session, DateTime Expire)> Sessions = new();
-    private static readonly TimeSpan Ttl = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan Ttl = TimeSpan.FromMinutes(2); 
     
     public static async Task<UserData> GetSession(long userId)
     {

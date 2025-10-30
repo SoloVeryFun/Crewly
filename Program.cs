@@ -5,7 +5,7 @@ using Telegram.Bot.Types.Enums;
 
 using Crewly;
 using Crewly.Data;
-using Crewly.Session;
+using Crewly.Manager;
 using Crewly.CleanUpRuntime;
 
 DataBaseHandler.EnsureMigrated();

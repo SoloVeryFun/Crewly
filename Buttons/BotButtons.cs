@@ -10,12 +10,12 @@ public static class BotButtons
         return KeyboardAndButtons.CreateKeyboard(("Я клиент", "client"), ("Я исполнитель", "executor"));
     }
 
-    public static ReplyKeyboardMarkup CreateClientUsageMenu()
+    public static ReplyKeyboardMarkup ClientUsageMenu()
     {
         return KeyboardAndButtons.CreateClientUsageMenu();
     }
 
-    public static ReplyKeyboardMarkup ExecutorClientUsageMenu()
+    public static ReplyKeyboardMarkup ExecutorUsageMenu()
     {
         return KeyboardAndButtons.CreateExecutorClientUsageMenu();
     }
@@ -23,6 +23,11 @@ public static class BotButtons
     public static ReplyKeyboardMarkup SettingMenu()
     {
         return KeyboardAndButtons.SettingButtons();
+    }
+
+    public static ReplyKeyboardMarkup CancelMenu()
+    {
+        return KeyboardAndButtons.CancelButtons();
     }
 }
 
@@ -70,7 +75,8 @@ public static class KeyboardAndButtons
     {   
         var replyKeyboard = new ReplyKeyboardMarkup(
         [
-            [ new KeyboardButton("Удалить аккаунт" )] 
+            [ new KeyboardButton("Удалить аккаунт" )],
+            [ new KeyboardButton("Назад" )] 
         ])
         {
             ResizeKeyboard = true,   
@@ -78,5 +84,19 @@ public static class KeyboardAndButtons
         };
         
         return replyKeyboard; 
+    }
+
+    public static ReplyKeyboardMarkup CancelButtons()
+    {
+        var replyKeyboard = new ReplyKeyboardMarkup(
+        [
+            [new KeyboardButton("Отмена")]
+        ])
+        {
+            ResizeKeyboard = true,
+            OneTimeKeyboard = false
+        };
+
+        return replyKeyboard;
     }
 }

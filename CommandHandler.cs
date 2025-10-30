@@ -2,7 +2,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 
 using Crewly.CommandsHandler;
-using Crewly.Session;
+using Crewly.Manager;
 
 namespace Crewly;
 
@@ -10,9 +10,10 @@ public class CommandHandler
 {
     private readonly IEnumerable<ICommandHandler> _handlers =  new List<ICommandHandler>()
     {
+        new TaskCreatingMessage(),
+        new OwnSurveyMessage(),
         new RegisterMessages(),
         new WaitForVerificationMessages(),
-        new OwnSurveyMessage(),
         new StartMessages()
     };
     

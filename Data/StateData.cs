@@ -27,7 +27,17 @@ public enum UserState
     ClientAvatar,
     ClientBrandGuide,
     ClientLocation,
-    ClientRegistrationCompleted,    
+    ClientRegistrationCompleted,  
+    
+    //Client creat a task
+    TaskTitle,
+    TaskSpecification,
+    TaskTags,
+    TaskBudget,
+    TaskDeadline,
+    TaskAttachments,
+    TaskCreatonCompleted,
+    
     
     //Wait for verification
     WaitForVerification,

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -58,6 +59,24 @@ namespace Crewly.Migrations
                 {
                     table.PrimaryKey("PK_Executors", x => x.UserId);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "Tasks",
+                columns: table => new
+                {
+                    TaskId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OwnerId = table.Column<long>(type: "bigint", nullable: true),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Specification = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Tags = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Budget = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Deadline = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Attachments = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tasks", x => x.TaskId);
+                });
         }
 
         /// <inheritdoc />
@@ -68,6 +87,9 @@ namespace Crewly.Migrations
 
             migrationBuilder.DropTable(
                 name: "Executors");
+
+            migrationBuilder.DropTable(
+                name: "Tasks");
 
             migrationBuilder.DropSequence(
                 name: "ClientDataSequence");

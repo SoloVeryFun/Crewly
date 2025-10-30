@@ -15,6 +15,7 @@ internal class BotDbContext : DbContext
 {
     public DbSet<ExecutorData> Executors { get; set; }
     public DbSet<ClientData> Clients { get; set; }
+    public DbSet<TaskData> Tasks { get; set; }
     
     private readonly string _connectionString = "Server=localhost;Database=Main;Integrated Security=true;TrustServerCertificate=True;";
 
@@ -27,8 +28,10 @@ internal class BotDbContext : DbContext
     {
         modelBuilder.Entity<ExecutorData>().ToTable("Executors").UseTpcMappingStrategy();
         modelBuilder.Entity<ClientData>().ToTable("Clients").UseTpcMappingStrategy();
-            
+        modelBuilder.Entity<TaskData>().ToTable("Tasks");    
+        
         modelBuilder.Entity<ExecutorData>().HasKey(e => e.UserId);
         modelBuilder.Entity<ClientData>().HasKey(e => e.UserId);
+        modelBuilder.Entity<TaskData>().HasKey(e => e.TaskId);
     }
 }

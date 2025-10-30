@@ -3,7 +3,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 
 using Crewly.Buttons;
-using Crewly.Session;
+using Crewly.Manager;
 
 namespace Crewly.MessageHandlingProcesses;
 
@@ -15,10 +15,10 @@ public enum InputType
     MultiText
 }
 
-public class RegistrationStep
+public class RegistrationStage
 {
     public string Question { get; init; } = "";
-    public InputType InputType { get; init; }
+    public InputType InputType { get; init; } =  InputType.Text;
     public int? MaxLength { get; init; } = 100;
     public int? MaxItems { get; init; } = 5;
 }
@@ -26,42 +26,35 @@ public class RegistrationStep
 public static class RegQuestions
 {
     
-    public static readonly Dictionary<UserState, RegistrationStep> Questions = new()
+    public static readonly Dictionary<UserState, RegistrationStage> Questions = new()
     {
         //Executor Steps
         [UserState.ExecutorName] = new() 
         { 
             Question = "Как вас зовут?", 
-            InputType = InputType.Text, 
-            MaxLength = 100     
         },
         
         [UserState.ExecutorBio] = new() 
         { 
             Question = "Коротко расскажите о себе (до 400 символов).", 
-            InputType = InputType.Text, 
             MaxLength = 400     
         },
         
         [UserState.ExecutorSpecializations] = new() 
         { 
-            Question = "Укажите ваши специализации (до 5).(Пишите разделно ',' )", 
+            Question = "Укажите ваши специализации (до 10).(Пишите разделно ',' )", 
             InputType = InputType.MultiText, 
-            MaxItems = 5
+            MaxItems = 10
         },
         
         [UserState.ExecutorBid] = new() 
         {        
             Question = "Какая у вас ставка (почасовая/фикс)?", 
-            InputType = InputType.Text, 
-            MaxLength = 100     
         },
         
         [UserState.ExecutorExperience] = new() 
         { 
             Question = "Сколько у вас опыта (лет/уровень)?", 
-            InputType = InputType.Text, 
-            MaxLength = 100     
         },
         
         [UserState.ExecutorPortfolio] = new() 
@@ -72,9 +65,7 @@ public static class RegQuestions
         
         [UserState.ExecutorAvailability] = new() 
         { 
-            Question = "Ваша занятость: свободен, частично занят, не берете заказы?", 
-            InputType = InputType.Text, 
-            MaxLength = 100     
+            Question = "Ваша занятость: свободен, частично занят, не берете заказы?",
         },
         
         [UserState.ExecutorAvatar] = new() 
@@ -86,59 +77,44 @@ public static class RegQuestions
         [UserState.ExecutorContacts] = new() 
         { 
             Question = "Оставьте контакты (телеграм, почта, телефон) — по желанию.", 
-            InputType = InputType.Text, 
-            MaxLength = 100     
         },
         
         //Clients Steps
         [UserState.ClientName] = new() 
         { 
             Question = "Как вас зовут или как называется ваша компания/студия?", 
-            InputType = InputType.Text, 
-            MaxLength = 100     
         },
         
         [UserState.ClientBio] = new() 
         { 
             Question = "Расскажите о себе или о вашем проекте (до 600 символов).", 
-            InputType = InputType.Text, 
             MaxLength = 600     
         },
         [UserState.ClientType] = new() 
         { 
             Question = "Вы частное лицо, студия или компания?", 
-            InputType = InputType.Text, 
-            MaxLength = 100     
         },
         [UserState.ClientBudgetary] = new() 
         { 
             Question = "Какой у вас бюджет?", 
-            InputType = InputType.Text, 
-            MaxLength = 100     
         },
         [UserState.ClientBrandGuide] = new() 
         { 
             Question = "Есть ли у вас ссылки или бренд‑гайд?", 
             InputType = InputType.Links, 
-            MaxLength = 100     
         },
         [UserState.ClientLanguage] = new() 
         { 
             Question = "На каком языке(ах) ваш проект?", 
-            InputType = InputType.Text, 
-            MaxLength = 100     
         },
         [UserState.ClientAvatar] = new() 
         { 
             Question = "Прикрепите ваш аватар или логотип.", 
             InputType = InputType.Photo, 
-            MaxLength = 100     
         },
         [UserState.ClientLocation] = new() 
         { 
             Question = "Где вы или ваша компания находитесь?", 
-            InputType = InputType.Text, 
-            MaxLength = 100     
         },
     };
 
@@ -146,12 +122,12 @@ public static class RegQuestions
     {
         error = null;
 
-        if (!Questions.TryGetValue(userState, out var step))
+        if (!Questions.TryGetValue(userState, out var stage))
         {
             return true;
         }
 
-        switch (step.InputType)
+        switch (stage.InputType)
         {
             case InputType.Photo:
                 if (message.Photo == null)
@@ -168,9 +144,9 @@ public static class RegQuestions
                     return false;
                 }
 
-                if (step.MaxLength.HasValue && message.Text.Length > step.MaxLength.Value)
+                if (stage.MaxLength.HasValue && message.Text.Length > stage.MaxLength.Value)
                 {
-                    error = $"❗ Текст слишком длинный. Максимум {step.MaxLength} символов.";
+                    error = $"❗ Текст слишком длинный. Максимум {stage.MaxLength} символов.";
                     return false;
                 }
                 break;
@@ -183,9 +159,9 @@ public static class RegQuestions
                     return false;
                 }
 
-                if (step.MaxItems.HasValue && items.Length > step.MaxItems.Value)
+                if (stage.MaxItems.HasValue && items.Length > stage.MaxItems.Value)
                 {
-                    error = $"❗ Можно указать максимум {step.MaxItems} специализаций.";
+                    error = $"❗ Можно указать максимум {stage.MaxItems} специализаций.";
                     return false;
                 }
                 break;
@@ -313,7 +289,7 @@ public class ResponseRegistrationProcessHandler(TelegramBotClient bot)
                         session.State = UserState.Menu;
                         if (session is ExecutorData executor)
                         {
-                            await bot.SendMessage(userId, "✅ Спасибо! Ваш профиль создан.", replyMarkup: BotButtons.ExecutorClientUsageMenu());
+                            await bot.SendMessage(userId, "✅ Спасибо! Ваш профиль создан.", replyMarkup: BotButtons.ExecutorUsageMenu());
                             await SqlDataBaseSave.SaveAsync(executor);
                         }
                         break;
@@ -321,7 +297,7 @@ public class ResponseRegistrationProcessHandler(TelegramBotClient bot)
                         session.State = UserState.Menu;
                         if (session is ClientData client)
                         {
-                            await bot.SendMessage(userId, "✅ Спасибо! Ваш профиль создан.", replyMarkup: BotButtons.CreateClientUsageMenu());
+                            await bot.SendMessage(userId, "✅ Спасибо! Ваш профиль создан.", replyMarkup: BotButtons.ClientUsageMenu());
                             await SqlDataBaseSave.SaveAsync(client);
                         }
                         break;

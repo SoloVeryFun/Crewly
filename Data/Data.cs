@@ -13,7 +13,19 @@ public static class UserStateGroup
     public static bool IsRegistration(UserState userState) => RegistrationState.Contains(userState);
     public static bool IsWaitForVerification(UserState userState) => WaitForVerification.Contains(userState);
     public static bool IsMenuAccess(UserState userState) => MenuAccess.Contains(userState);
+    public static bool IsTaskCreate(UserState userState) => TaskState.Contains(userState);
 
+    private static readonly HashSet<UserState> TaskState =
+    [
+        UserState.TaskTitle,
+        UserState.TaskSpecification,
+        UserState.TaskTags,
+        UserState.TaskBudget,
+        UserState.TaskDeadline,
+        UserState.TaskAttachments,
+        UserState.TaskCreatonCompleted
+    ];
+    
     private static readonly HashSet<UserState> MenuAccess = 
     [
         UserState.Menu,
@@ -86,4 +98,16 @@ public class ClientData : UserData
     public string? Language         { get; set; } = "";
     public string? Avatar           { get; set; } = "";
     public string? Location         { get; set; } = "";
+}
+
+public class TaskData
+{
+    public long? OwnerId         { get; set; }
+    public Guid TaskId           { get; set; } = Guid.NewGuid();
+    public string? Title         { get; set; } = "";
+    public string? Specification { get; set; } = "";
+    public string? Tags          { get; set; } = "";
+    public string? Budget        { get; set; } = "";
+    public string? Deadline      { get; set; } = "";
+    public string? Attachments   { get; set; } = "";
 }

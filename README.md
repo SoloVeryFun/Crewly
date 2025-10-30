@@ -1,44 +1,54 @@
-🤖 Client and Executor Registration — Telegram Bot Module
+🤖 Client & Executor Registration — Telegram Bot Module
 📖 Overview
 
-This module manages user onboarding, state-based message handling, and database operations in a Telegram bot.
-It allows users to register as either Client or Executor and manage their profiles through an intuitive menu system.
+This module powers user onboarding, state-driven message handling, and database interaction for a Telegram bot.
+It enables users to register as Clients or Executors, manage their profiles, and navigate through a clear, interactive menu system.
 
 📌 Key Features
 🔹 State-Based Message Handling
 
-Every incoming message is processed according to the user’s current state.
-This enables:
+Each message is processed according to the user’s current state, ensuring:
 
-Smooth, step-by-step interaction flow;
+Smooth, step-by-step registration and interaction flow;
 
-Proper data persistence in the database;
+Reliable data persistence in the database;
 
-Stable and predictable registration logic.
+Predictable and stable logic during onboarding and menu navigation.
 
 🔹 Optimized Database Integration
 
-Built on Entity Framework Core (SQL Server);
+Built on Entity Framework Core with SQL Server backend;
 
 Fully optimized CRUD operations (create, update, delete);
 
-Includes session caching and automatic cleanup of inactive sessions.
+Includes session caching with auto-cleanup for inactive users;
 
-🔹 Navigation Menu
+Clean separation between data access and bot logic.
 
-📄 View your profile;
+🔹 Dynamic Navigation Menu
 
-A new ⚙ Settings menu has been added, featuring:
-🗑 Delete account;
+The user-friendly navigation system includes:
 
-⚙️  Technical Details
+📄 View Profile — quickly access personal data;
 
-Telegram.Bot 22.x — for Telegram API integration;
+⚙ Settings — manage account preferences and actions:
 
-Entity Framework Core — for SQL Server data handling;
+🗑 Delete Account;
+
+(More options coming soon!)
+
+⚙️ Technical Stack
+
+Telegram.Bot 22.x — seamless Telegram Bot API integration;
+
+Entity Framework Core — robust ORM for SQL Server;
+
+C# / .NET 8 — clean, scalable backend foundation;
 
 🚀 Future Improvements
 
-Extended profile editing;
+✏️ Extended Profile Editing — update bio, skills, and contact info;
 
-Job posting and response management between Clients and Executors.
+🔄 Improved Session Management — Redis-based cache for better scalability;
+
+🧩 Modular Handlers — easier maintenance and feature expansion.
