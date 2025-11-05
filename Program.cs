@@ -9,10 +9,9 @@ using Crewly.Manager;
 using Crewly.CleanUpRuntime;
 
 DataBaseHandler.EnsureMigrated();
-CleanUpRuntime.StartCleanupTask(SessionManager.GetExpiredKeys, SessionManager.Remove);
 
 using var cts = new CancellationTokenSource();
-var bot = new TelegramBotClient("YOUR_TG_BOT_TOKEN", cancellationToken:cts.Token);
+var bot = new TelegramBotClient("YOUR_TG_BOT_API", cancellationToken:cts.Token);
 var me = await bot.GetMe();
 
 var commandHandler = new CommandHandler();

@@ -1,4 +1,5 @@
 using Crewly.Buttons;
+using Crewly.CommandsHandler;
 using Crewly.Data;
 using Crewly.Manager;
 using Telegram.Bot;
@@ -141,10 +142,9 @@ public class ResponseCreatingTaskProcessesHandler(TelegramBotClient bot)
         if (session.State == UserState.Menu)
         {
             await bot.SendMessage(userId, "Создание заказа!👇", replyMarkup:BotButtons.CancelMenu());
-            TaskQuestions.GetNext(session.State);
         }
         
-        var task = TaskSession.GetTaskSession(userId); 
+        var task = await TaskSession.GetTaskSession(userId);    
         
         if (!TaskQuestions.ValidateInput(session.State, message, out var error))
         {
@@ -162,15 +162,17 @@ public class ResponseCreatingTaskProcessesHandler(TelegramBotClient bot)
         if (session.State == UserState.TaskCreatonCompleted)
         {
             await SqlDataBaseSave.TaskSaveAsync(task);
-            await TaskSession.Remove(userId);
-            
-            await bot.SendMessage(userId, $"✅ Задача {task.Title} успешно создана!");
-            
-            session.State = UserState.Menu;
+
+            string text = $"✅ Задача {task.Title} успешно создана!";
+            await CancelOperation.CancelOrReturnToMenu(text, userId, bot);
+            return;
         }
         else
         {
             await bot.SendMessage(userId, TaskQuestions.Questions[session.State].Question);
         }
+        
+        await SessionManager.SetSession(session);
+        await TaskSession.SetTaskSession(task);
     }
 }

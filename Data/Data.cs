@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Crewly.Data;
 
 public enum UserRole
@@ -68,6 +70,11 @@ public static class UserStateGroup
 
 
 //DATA
+
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
+[JsonDerivedType(typeof(UserData), "base")]
+[JsonDerivedType(typeof(ExecutorData), "executor")]
+[JsonDerivedType(typeof(ClientData), "client")]
 public class UserData
 {
     public long UserId { get; set; }

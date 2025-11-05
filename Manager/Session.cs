@@ -1,69 +1,58 @@
-using System.Collections.Concurrent;
-using Crewly.Data;
+using System.Text.Json;
+using Crewly.Config;
+using StackExchange.Redis;
 using Microsoft.EntityFrameworkCore;
+using Crewly.Data;
 
 namespace Crewly.Manager;
 
 public static class SessionManager
 {
-    private static readonly ConcurrentDictionary<long, (UserData Session, DateTime Expire)> Sessions = new();
-    private static readonly TimeSpan Ttl = TimeSpan.FromMinutes(2); 
+    private static readonly IDatabase Db = RedisManager.GetDatabase();
+    
+    private static readonly TimeSpan Ttl = TimeSpan.FromMinutes(30);
     
     public static async Task<UserData> GetSession(long userId)
     {
-        if (Sessions.TryGetValue(userId, out var entry))
+        var key = $"{userId}";
+        var json = await Db.StringGetAsync(key);
+
+        if (json.HasValue)
         {
-            if (entry.Expire > DateTime.UtcNow)
-            {
-                await SetSession(entry.Session);
-            }
+            var session = JsonSerializer.Deserialize<UserData>(json!, SerializationConfig.Options);
+            await Db.KeyExpireAsync(key, Ttl);
             
-            Console.WriteLine("--------------------");
-            Console.WriteLine(entry.Expire);
-            Console.WriteLine(DateTime.UtcNow);
-            Console.WriteLine(entry.Session.State);
-            Console.WriteLine("--------------------");
-
-            return entry.Session;
+            return session!;
         }
-
+        
         await using var db = new BotDbContext();
         
         var executor = await db.Executors.FirstOrDefaultAsync(x => x.UserId == userId);
         if (executor != null)
         {
             Console.WriteLine("Export from Executors DB");
-            Sessions[userId] = (executor, DateTime.UtcNow.Add(Ttl));
+            await SetSession(executor);
             return executor;
         }
 
         var client = await db.Clients.FirstOrDefaultAsync(x => x.UserId == userId);
         if (client != null)
         {
-            Console.WriteLine("Export from Clients DB");
-            Sessions[userId] = (client, DateTime.UtcNow.Add(Ttl));
+            Console.WriteLine("Client from Clients DB");
+            await SetSession(client);
             return client;
         }
         
-        var session = new UserData { UserId = userId };
-        Sessions[userId] = (session, DateTime.UtcNow.Add(Ttl));
-        return session;
+        var sessionNew = new UserData() {UserId = userId};
+        await SetSession(sessionNew);
+        return sessionNew;
     }
     
     public static async Task SetSession(UserData userData)
     {
-        Sessions[userData.UserId] = (userData, DateTime.UtcNow.Add(Ttl));
-    }
-    
-    public static async Task<IEnumerable<long>> GetExpiredKeys()
-    {
-        var utcNow = DateTime.UtcNow;
-        return Sessions.Where(kvp => kvp.Value.Expire <= utcNow).Select(kvp => kvp.Key);
-    }
-
-    public static async Task Remove(long userId)
-    {
-        await SqlDataBaseSave.SaveAsync(Sessions[userId].Session);
-        Sessions.TryRemove(userId, out _);
+        var key = $"{userData.UserId}";
+        var json = JsonSerializer.Serialize(userData, SerializationConfig.Options);
+        
+        await Db.StringSetAsync(key, json, Ttl);
     }
 }

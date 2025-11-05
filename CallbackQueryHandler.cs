@@ -47,13 +47,16 @@ public class CallbackQueryHandler
 
         if (user is not T)
         {
-            user = new T
+            user = new T()
             {
                 UserId = userId,
                 Role = role,
                 State = userState
             };
-            SessionManager.SetSession(user);
+            
+            Console.WriteLine(typeof(T));
+            
+            await SessionManager.SetSession(user);
         }
         
         await _responsesForProcessing.ResponseRegistrationProcess( userId, new Message(){Text = "Registration start"});

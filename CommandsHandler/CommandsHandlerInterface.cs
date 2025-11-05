@@ -45,15 +45,10 @@ public class OwnSurveyMessage : ICommandHandler
             case "Удалить аккаунт":
                 await DeleteProcess.Delete(userId);
                 await bot.SendMessage(chatId: userId, text: "Ваш аккаунт удален😔",replyMarkup: new ReplyKeyboardRemove());
-                
-                session = await SessionManager.GetSession(userId);
-                Console.WriteLine(session.Role);
-                Console.WriteLine(session.State);
-                Console.WriteLine(session.UserId);
                 break;
             
             case "Назад":
-                await CancelOperation.CancelAndReturnToMenu("Вы вернулись в главное меню)", userId, bot);
+                await CancelOperation.CancelOrReturnToMenu("Вы вернулись в главное меню)", userId, bot);
                 break;
             
             default:
@@ -72,8 +67,7 @@ public class TaskCreatingMessage : ICommandHandler
         switch (message.Text)
         {
             case "Отмена":
-                await TaskSession.Remove(userId);
-                await CancelOperation.CancelAndReturnToMenu("Создание нового заказа отменена", userId, bot);
+                await CancelOperation.CancelOrReturnToMenu("Создание нового заказа отменена", userId, bot);
                 break;
             
             default:
@@ -126,7 +120,7 @@ public class StartMessages : ICommandHandler
 //Cancel
 public static class CancelOperation
 {
-    public static async Task CancelAndReturnToMenu(string message, long userId, TelegramBotClient bot)
+    public static async Task CancelOrReturnToMenu(string message, long userId, TelegramBotClient bot)
     {
         var session = await SessionManager.GetSession(userId);
         session.State = UserState.Menu;
@@ -144,5 +138,7 @@ public static class CancelOperation
         }
         
         await bot.SendMessage(userId, message, replyMarkup: keyboard);
+        await SessionManager.SetSession(session);
+        await TaskSession.Remove(userId);
     }
 }

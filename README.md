@@ -1,54 +1,46 @@
-🤖 Client & Executor Registration — Telegram Bot Module
-📖 Overview
+Crewly
 
-This module powers user onboarding, state-driven message handling, and database interaction for a Telegram bot.
-It enables users to register as Clients or Executors, manage their profiles, and navigate through a clear, interactive menu system.
+Telegram bot for connecting clients with creative freelancers.
+Clients can browse freelancer profiles by specialization, and freelancers can receive project requests directly through the bot.
+Includes registration, profile management, filtering, favorites.
 
-📌 Key Features
-🔹 State-Based Message Handling
+Features
 
-Each message is processed according to the user’s current state, ensuring:
+Registration flow for both clients and freelancers — including specialization and contact details.
 
-Smooth, step-by-step registration and interaction flow;
+Clients: browse and filter freelancers, add profiles to favorites.
 
-Reliable data persistence in the database;
+Freelancers: receive client requests, manage availability status.
 
-Predictable and stable logic during onboarding and menu navigation.
+Modular architecture separating message handling, business logic, and data layers.
 
-🔹 Optimized Database Integration
+Tech Stack
 
-Built on Entity Framework Core with SQL Server backend;
+.NET 8 (C#) — core framework.
 
-Fully optimized CRUD operations (create, update, delete);
+Telegram.Bot API (v22.x) — integration with Telegram.
 
-Includes session caching with auto-cleanup for inactive users;
+Entity Framework Core — ORM for SQL Server database operations.
 
-Clean separation between data access and bot logic.
+Redis — used for session hash and cache storage (updated system — see below).
 
-🔹 Dynamic Navigation Menu
+Layered design: data managers, command handlers, and Telegram interaction separated by responsibility.
 
-The user-friendly navigation system includes:
+Update: Hash Storage Migration to Redis
 
-📄 View Profile — quickly access personal data;
+Previously, hash data and temporary user states were stored using an in-memory or SQL-based mechanism.
+In this update, all user session hashes and temporary state data are now stored in Redis.
 
-⚙ Settings — manage account preferences and actions:
+Benefits of this change:
 
-🗑 Delete Account;
+⚡ High performance and low latency data access.
 
-(More options coming soon!)
+⏳ Built-in TTL management — automatic expiration of session keys.
 
-⚙️ Technical Stack
+☁️ Scalable architecture — supports multiple bot instances with a shared cache.
 
-Telegram.Bot 22.x — seamless Telegram Bot API integration;
+🧩 Cleaner design — separates persistent data (SQL) and volatile data (Redis).
 
-Entity Framework Core — robust ORM for SQL Server;
+Future Improvements
 
-C# / .NET 8 — clean, scalable backend foundation;
-
-🚀 Future Improvements
-
-✏️ Extended Profile Editing — update bio, skills, and contact info;
-
-🔄 Improved Session Management — Redis-based cache for better scalability;
-
-🧩 Modular Handlers — easier maintenance and feature expansion.
+Client Management Panel Enhancements

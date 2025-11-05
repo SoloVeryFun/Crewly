@@ -271,8 +271,10 @@ public class ResponseRegistrationProcessHandler(TelegramBotClient bot)
                 
                 RegQuestions.SetValue(session, filePath);
             }
-            else if (message.Text != null)
+            
+            if (message.Text != null)
             {
+                Console.WriteLine(session);
                 RegQuestions.SetValue(session, message.Text);
             }
             
@@ -307,5 +309,7 @@ public class ResponseRegistrationProcessHandler(TelegramBotClient bot)
             {
                 await bot.SendMessage(userId, RegQuestions.Questions[session.State].Question);
             }
+
+            await SessionManager.SetSession(session);
         }
 }
