@@ -15,7 +15,9 @@ public static class UserStateGroup
     public static bool IsRegistration(UserState userState) => RegistrationState.Contains(userState);
     public static bool IsWaitForVerification(UserState userState) => WaitForVerification.Contains(userState);
     public static bool IsMenuAccess(UserState userState) => MenuAccess.Contains(userState);
+    public static bool IsUserProfileMenu(UserState userState) => UserProfileMenu.Contains(userState);
     public static bool IsTaskCreate(UserState userState) => TaskState.Contains(userState);
+    public static bool IsTaskEditing(UserState userState) => TaskEdit.Contains(userState);
 
     private static readonly HashSet<UserState> TaskState =
     [
@@ -25,12 +27,24 @@ public static class UserStateGroup
         UserState.TaskBudget,
         UserState.TaskDeadline,
         UserState.TaskAttachments,
-        UserState.TaskCreatonCompleted
+        UserState.TaskCreationCompleted
+    ];
+
+    private static readonly HashSet<UserState> TaskEdit =
+    [
+        UserState.PreparationEditTask,
+        UserState.EditTask,
     ];
     
     private static readonly HashSet<UserState> MenuAccess = 
     [
         UserState.Menu,
+    ];
+
+    private static readonly HashSet<UserState> UserProfileMenu =
+    [
+        UserState.ClientProfileMenu,
+        UserState.ExecutorProfileMenu
     ];
     
     private static readonly HashSet<UserState> WaitForVerification =
@@ -117,4 +131,11 @@ public class TaskData
     public string? Budget        { get; set; } = "";
     public string? Deadline      { get; set; } = "";
     public string? Attachments   { get; set; } = "";
+}
+
+public class TaskEditData
+{
+    public long? OwnerId       { get; set; }
+    public Guid taskId { get; set; }
+    public string? field { get; set; } = "";
 }

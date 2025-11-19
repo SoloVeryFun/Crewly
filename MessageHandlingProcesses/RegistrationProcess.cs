@@ -223,8 +223,9 @@ public static class RegQuestions
     }
 }
 
-public class ResponseRegistrationProcessHandler(TelegramBotClient bot)
+public class ResponseRegistrationProcessHandler
 {
+    private TelegramBotClient _bot = BotHolder.Bot!;
     public async Task ResponseRegistrationProcess(long userId, Message message)
     {
         var session = await SessionManager.GetSession(userId);
@@ -241,7 +242,7 @@ public class ResponseRegistrationProcessHandler(TelegramBotClient bot)
                 break;
 
             default:
-                await bot.SendMessage(userId, "Некорректный ответ");
+                await _bot.SendMessage(userId, "Некорректный ответ");
                 break;
         }
     }
@@ -252,14 +253,14 @@ public class ResponseRegistrationProcessHandler(TelegramBotClient bot)
 
             if (!RegQuestions.ValidateInput(session.State, message, out var error))
             {
-                await bot.SendMessage(userId, error!);
+                await _bot.SendMessage(userId, error!);
                 return;
             }
 
             if (message.Photo != null)
             {
                 var photo = message.Photo!.Last();
-                var file = await bot.GetFile(photo.FileId);
+                var file = await _bot.GetFile(photo.FileId);
 
                 Directory.CreateDirectory("Images");
 
@@ -267,7 +268,7 @@ public class ResponseRegistrationProcessHandler(TelegramBotClient bot)
                 var filePath = Path.Combine("Images", fileName);
 
                 await using var fs = new FileStream(filePath, FileMode.Create);
-                await bot.DownloadFile(file.FilePath!, fs);
+                await _bot.DownloadFile(file.FilePath!, fs);
                 
                 RegQuestions.SetValue(session, filePath);
             }
@@ -291,7 +292,7 @@ public class ResponseRegistrationProcessHandler(TelegramBotClient bot)
                         session.State = UserState.Menu;
                         if (session is ExecutorData executor)
                         {
-                            await bot.SendMessage(userId, "✅ Спасибо! Ваш профиль создан.", replyMarkup: BotButtons.ExecutorUsageMenu());
+                            await _bot.SendMessage(userId, "✅ Спасибо! Ваш профиль создан.", replyMarkup: BotButtons.ExecutorUsageMenu());
                             await SqlDataBaseSave.SaveAsync(executor);
                         }
                         break;
@@ -299,7 +300,7 @@ public class ResponseRegistrationProcessHandler(TelegramBotClient bot)
                         session.State = UserState.Menu;
                         if (session is ClientData client)
                         {
-                            await bot.SendMessage(userId, "✅ Спасибо! Ваш профиль создан.", replyMarkup: BotButtons.ClientUsageMenu());
+                            await _bot.SendMessage(userId, "✅ Спасибо! Ваш профиль создан.", replyMarkup: BotButtons.ClientUsageMenu());
                             await SqlDataBaseSave.SaveAsync(client);
                         }
                         break;
@@ -307,7 +308,7 @@ public class ResponseRegistrationProcessHandler(TelegramBotClient bot)
             }
             else
             {
-                await bot.SendMessage(userId, RegQuestions.Questions[session.State].Question);
+                await _bot.SendMessage(userId, RegQuestions.Questions[session.State].Question);
             }
 
             await SessionManager.SetSession(session);

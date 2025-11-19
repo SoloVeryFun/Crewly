@@ -1,8 +1,10 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace Crewly.Data;
 
 public static class SqlDataBaseDelete
 {
-    public static async Task DeleteAsync(long userId)
+    public static async Task DeleteUserAsync(long userId)
     {
         await using var db = new BotDbContext();
 
@@ -19,6 +21,16 @@ public static class SqlDataBaseDelete
                 db.Clients.Remove(client);
             }
         }
+        
+        await db.SaveChangesAsync();
+    }
+
+    public static async Task DeleteTasksAsync(long userId)
+    {
+        await using var db = new BotDbContext();
+        
+        var tasks = await db.Tasks.Where(x => x.OwnerId == userId).ToListAsync();
+        db.Tasks.RemoveRange(tasks);
         
         await db.SaveChangesAsync();
     }

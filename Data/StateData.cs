@@ -17,6 +17,8 @@ public enum UserState
     ExecutorContacts,
     ExecutorRegistrationCompleted,
     
+    ExecutorProfileMenu,
+    
     //Client
     ClientRegistrationStart,
     ClientName,
@@ -29,6 +31,8 @@ public enum UserState
     ClientLocation,
     ClientRegistrationCompleted,  
     
+    ClientProfileMenu,
+    
     //Client creat a task
     TaskTitle,
     TaskSpecification,
@@ -36,7 +40,10 @@ public enum UserState
     TaskBudget,
     TaskDeadline,
     TaskAttachments,
-    TaskCreatonCompleted,
+    TaskCreationCompleted,
+    
+    PreparationEditTask,
+    EditTask,
     
     
     //Wait for verification

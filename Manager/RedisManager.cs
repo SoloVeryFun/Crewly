@@ -2,7 +2,7 @@ using StackExchange.Redis;
 
 namespace Crewly.Manager;
 
-public class RedisManager
+public static class RedisManager
 {
     private static readonly Lazy<ConnectionMultiplexer> LazyConnection =
         new(() => ConnectionMultiplexer.Connect("localhost"));

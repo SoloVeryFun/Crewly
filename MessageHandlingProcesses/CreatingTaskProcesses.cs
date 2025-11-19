@@ -2,8 +2,10 @@ using Crewly.Buttons;
 using Crewly.CommandsHandler;
 using Crewly.Data;
 using Crewly.Manager;
+
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Crewly.MessageHandlingProcesses;
 
@@ -115,7 +117,7 @@ public static class TaskQuestions
             UserState.TaskTags => UserState.TaskBudget,
             UserState.TaskBudget => UserState.TaskDeadline,
             UserState.TaskDeadline => UserState.TaskAttachments,
-            _ => UserState.TaskCreatonCompleted,
+            _ => UserState.TaskCreationCompleted,
         };
     }
 
@@ -133,10 +135,11 @@ public static class TaskQuestions
     }
 }
 
-public class ResponseCreatingTaskProcessesHandler(TelegramBotClient bot)
+public class ResponseCreatingTaskProcessesHandler
 {
     public async Task CreatingTaskProcess(long userId, Message message)
     {
+        var bot = BotHolder.Bot!;
         var session = await SessionManager.GetSession(userId);
 
         if (session.State == UserState.Menu)
@@ -144,7 +147,7 @@ public class ResponseCreatingTaskProcessesHandler(TelegramBotClient bot)
             await bot.SendMessage(userId, "Создание заказа!👇", replyMarkup:BotButtons.CancelMenu());
         }
         
-        var task = await TaskSession.GetTaskSession(userId);    
+        var task = await TaskSession.GetActivateTaskSession<TaskData>(userId);    
         
         if (!TaskQuestions.ValidateInput(session.State, message, out var error))
         {
@@ -159,12 +162,16 @@ public class ResponseCreatingTaskProcessesHandler(TelegramBotClient bot)
         
         session.State = TaskQuestions.GetNext(session.State);
 
-        if (session.State == UserState.TaskCreatonCompleted)
+        if (session.State == UserState.TaskCreationCompleted)
         {
             await SqlDataBaseSave.TaskSaveAsync(task);
 
             string text = $"✅ Задача {task.Title} успешно создана!";
-            await CancelOperation.CancelOrReturnToMenu(text, userId, bot);
+            
+            await ViewTasks.CancelOperation(userId);
+            await TaskSession.Remove(userId);
+            await CancelOperation.CancelOrReturnToMenu(text, userId);
+            
             return;
         }
         else
@@ -173,6 +180,76 @@ public class ResponseCreatingTaskProcessesHandler(TelegramBotClient bot)
         }
         
         await SessionManager.SetSession(session);
-        await TaskSession.SetTaskSession(task);
+        await TaskSession.SetActivateTaskSession(task);
+    }
+}
+
+public static class ResponseEditingTaskProcessesHandler
+{
+    private static class TaskFieldNames
+    {
+        public static readonly Dictionary<string, string> Map = new()
+        {
+            ["Заголовок"]  = "Title",
+            ["Краткое ТЗ"] = "Specification",
+            ["Теги"]       = "Tags",
+            ["Бюджет"]     = "Budget",
+            ["Дедлайн"]    = "Deadline",
+            ["Вложение"]   = "Attachments"
+        };
+    }
+    
+    public static async Task EditingTaskProcess(long userId, string data)
+    {
+        var bot = BotHolder.Bot!;
+        var session = await SessionManager.GetSession(userId);
+        
+        //Preparation
+        if (!UserStateGroup.IsTaskEditing(session.State))
+        {
+            await ViewTasks.CancelOperation(userId);
+            
+            Guid taskId = Guid.Parse(data.Split('.', StringSplitOptions.RemoveEmptyEntries)[1]);
+
+            var taskEdit = new TaskEditData(){OwnerId = userId, taskId = taskId};
+            await TaskSession.SetActivateTaskSession(taskEdit);
+        
+            session.State = UserState.PreparationEditTask;
+            await bot.SendMessage(userId, "В каком часте задачи вам нужно внести поправки?", replyMarkup:BotButtons.TaskEditing());
+            await SessionManager.SetSession(session);
+            
+            return;
+        }
+
+        //Editing
+        var taskEditData  = await TaskSession.GetActivateTaskSession<TaskEditData>(userId);
+        
+        if (session.State == UserState.PreparationEditTask)
+        {
+            TaskFieldNames.Map.TryGetValue(data, out var field);
+            
+            taskEditData.field = field;
+            await TaskSession.SetActivateTaskSession(taskEditData);
+            
+            session.State = UserState.EditTask;
+            await SessionManager.SetSession(session);
+
+            await bot.SendMessage(userId, "Внесите поправки!", replyMarkup: new ReplyKeyboardRemove());
+            
+            return;
+        }
+        
+        var task = await TaskSession.GetTask(taskEditData.taskId);
+        var property = typeof(TaskData).GetProperty(taskEditData.field!);
+        
+        property!.SetValue(task, data);
+        await SqlDataBaseSave.TaskSaveAsync(task);
+
+        await bot.SendMessage(userId, "Изменени были прменены", replyMarkup:BotButtons.ClientProfileMenu());
+        
+        session.State = UserState.ClientProfileMenu;
+        
+        await SessionManager.SetSession(session);
+        await TaskSession.Remove(userId);
     }
 }

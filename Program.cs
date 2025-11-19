@@ -5,13 +5,14 @@ using Telegram.Bot.Types.Enums;
 
 using Crewly;
 using Crewly.Data;
-using Crewly.Manager;
-using Crewly.CleanUpRuntime;
 
 DataBaseHandler.EnsureMigrated();
 
 using var cts = new CancellationTokenSource();
-var bot = new TelegramBotClient("YOUR_TG_BOT_API", cancellationToken:cts.Token);
+BotHolder.Init("YOUR_TG_BOT_API", cts.Token);
+// var bot = new TelegramBotClient("8277524231:AAEttxcnyAE2A0EBhKH7anyiQAVnGePnUc4", cancellationToken:cts.Token);
+
+var bot = BotHolder.Bot!;
 var me = await bot.GetMe();
 
 var commandHandler = new CommandHandler();
@@ -19,7 +20,6 @@ var commandHandler = new CommandHandler();
 bot.OnError += OnError;
 bot.OnMessage += OnMessage;
 bot.OnUpdate += OnUpdate;
-
 
 Console.WriteLine($"{me.Username} is running...");
 Console.ReadLine();
@@ -31,7 +31,7 @@ async Task OnError(Exception exception, HandleErrorSource source)
 
 async Task OnMessage(Message message, UpdateType type)
 {
-    await commandHandler.HandleMessage(message, bot);
+    await commandHandler.HandleMessage(message);
 }
 
 async Task OnUpdate(Update update)

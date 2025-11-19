@@ -1,36 +1,30 @@
-using System.Text.Json;
-using Newtonsoft.Json;
-
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
 using Crewly.Data;
 using Crewly.Manager;
 
-using Microsoft.EntityFrameworkCore;
-using StackExchange.Redis;
-
 namespace Crewly.MessageHandlingProcesses;
 
 public class SendUserProfileProcessHandler
 {
-    public async Task SendUserProfileProcess(long userId, TelegramBotClient bot)
+    public async Task SendUserProfileProcess(long userId)
     {
+        var session = await SessionManager.GetSession(userId);
         await using var db = new BotDbContext();
+
+        string caption;
         
-        var executor = await db.Executors.FirstOrDefaultAsync(x => x.UserId == userId);
-        if (executor != null)
+        switch (session)
         {
-            string caption = BuildExecutorCaption(executor);
-            await SendUser(bot, userId, executor.Avatar!, caption);
-            return;
-        }
-        
-        var client = await db.Clients.FirstOrDefaultAsync(x => x.UserId == userId);
-        if (client != null)
-        {
-            string caption = BuildClientCaption(client);
-            await SendUser(bot, userId, client.Avatar!, caption);
+            case ClientData client:
+                caption = BuildClientCaption(client);
+                await SendUser(userId, client.Avatar!, caption);
+                break;
+            case ExecutorData executor:
+                caption = BuildExecutorCaption(executor);
+                await SendUser(userId, executor.Avatar!, caption);
+                break;
         }
     }
 
@@ -52,8 +46,10 @@ public class SendUserProfileProcessHandler
                $"Ставка: {client.Language}\n";
     }
 
-    private async Task SendUser(TelegramBotClient bot, long chatId, string avatarPath, string caption)
+    private async Task SendUser(long chatId, string avatarPath, string caption)
     {
+        var bot = BotHolder.Bot!;
+        
         if (!string.IsNullOrEmpty(avatarPath) && File.Exists(avatarPath))
         {
             await bot.SendPhoto(chatId, new InputFileStream(File.OpenRead(avatarPath)), caption);

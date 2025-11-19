@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace Crewly.Data;
 
 public static class SqlDataBaseSave
@@ -38,7 +36,16 @@ public static class SqlDataBaseSave
     {
         await using var db = new BotDbContext();
         
-        await db.Tasks.AddAsync(data);
+        var task = await db.Tasks.FindAsync(data.TaskId);
+
+        if (task == null)
+        {
+            await db.Tasks.AddAsync(data);
+        }
+        else
+        {
+            db.Entry(task).CurrentValues.SetValues(data);
+        }
         await db.SaveChangesAsync();
     }
 }

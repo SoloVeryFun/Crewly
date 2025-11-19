@@ -6,7 +6,7 @@ using Crewly.Manager;
 
 namespace Crewly.MessageHandlingProcesses;
 
-public class WaitForVerificationProcessHandler(TelegramBotClient bot, long userId)
+public class WaitForVerificationProcessHandler(long userId)
 {
     private UserRole _role;
     
@@ -21,6 +21,9 @@ public class WaitForVerificationProcessHandler(TelegramBotClient bot, long userI
     
     public async Task WaitForVerificationProcess()
     {
+        var bot = BotHolder.Bot!;
+        
+        
         switch (_role)
         {
             case UserRole.Client:

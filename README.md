@@ -1,46 +1,66 @@
 Crewly
 
+
+
 Telegram bot for connecting clients with creative freelancers.
+
 Clients can browse freelancer profiles by specialization, and freelancers can receive project requests directly through the bot.
-Includes registration, profile management, filtering, favorites.
 
-Features
+The system includes registration, profile management, filtering, favorites, and client-side task management.
 
-Registration flow for both clients and freelancers — including specialization and contact details.
 
-Clients: browse and filter freelancers, add profiles to favorites.
-
-Freelancers: receive client requests, manage availability status.
-
-Modular architecture separating message handling, business logic, and data layers.
 
 Tech Stack
 
+
+
 .NET 8 (C#) — core framework.
 
-Telegram.Bot API (v22.x) — integration with Telegram.
 
-Entity Framework Core — ORM for SQL Server database operations.
 
-Redis — used for session hash and cache storage (updated system — see below).
+Telegram.Bot API (v22.x) — Telegram integration.
 
-Layered design: data managers, command handlers, and Telegram interaction separated by responsibility.
 
-Update: Hash Storage Migration to Redis
 
-Previously, hash data and temporary user states were stored using an in-memory or SQL-based mechanism.
-In this update, all user session hashes and temporary state data are now stored in Redis.
+Entity Framework Core — ORM for SQL Server.
 
-Benefits of this change:
 
-⚡ High performance and low latency data access.
 
-⏳ Built-in TTL management — automatic expiration of session keys.
+Redis — session hash and cache storage.
 
-☁️ Scalable architecture — supports multiple bot instances with a shared cache.
 
-🧩 Cleaner design — separates persistent data (SQL) and volatile data (Redis).
+
+Layered design: data managers, command handlers, and Telegram interaction separated by responsibility
+
+
+
+New Update: Client Task Editing \& Deletion
+
+
+
+This update introduces full task management capabilities on the client side:
+
+
+
+✏️ Clients can now edit their existing tasks
+
+
+
+❌ Clients can now delete tasks
+
+
+
+This allows clients to manage projects more flexibly without needing admin assistance.
+
+
 
 Future Improvements
 
-Client Management Panel Enhancements
+
+
+Expanded management panel for clients
+
+
+
+Advanced analytics for freelancers
+
